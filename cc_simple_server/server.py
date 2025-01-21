@@ -25,13 +25,6 @@ async def read_root():
     """
     return {"message": "Welcome to the Cloud Computing!"}
 
-@pytest.fixture(autouse=True) 
-def clear_tasks(): 
-    global tasks, next_id 
-    tasks.clear() 
-    next_id = 1
-
-
 # POST ROUTE data is sent in the body of the request
 @app.post("/tasks/", response_model=TaskRead)
 async def create_task(task_data: TaskCreate):

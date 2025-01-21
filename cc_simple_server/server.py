@@ -38,7 +38,7 @@ async def create_task(task_data: TaskCreate):
     Returns:
         TaskRead: The created task data
     """
-
+    global next_id, tasks
     task = TaskRead(id=next_id, title=task_data.title, description=task_data.description)
     tasks.append(task)
     next_id += 1
@@ -57,6 +57,7 @@ async def get_tasks():
     Returns:
         list[TaskRead]: A list of all tasks in the database
     """
+    global tasks
     return tasks
 
 
@@ -73,6 +74,7 @@ async def update_task(task_id: int, task_data: TaskCreate):
     Returns:
         TaskRead: The updated task data
     """
+    global tasks
     for task in tasks:
         if task.id == task_id:
             task.title = task_data.title
@@ -95,4 +97,4 @@ async def delete_task(task_id: int):
     """
     global tasks
     tasks = [task for task in tasks if task.id != task_id]
-    return {"message": "Task deletd successfully"}
+    return {"message": "Task deleted successfully"}

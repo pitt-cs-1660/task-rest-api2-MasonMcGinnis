@@ -39,7 +39,7 @@ async def create_task(task_data: TaskCreate):
         TaskRead: The created task data
     """
     global next_id, tasks
-    task = TaskRead(id=next_id, title=task_data.title, description=task_data.description)
+    task = TaskRead(id=next_id, title=task_data.title, description=task_data.description, completed=task_data.completed)
     tasks.append(task)
     next_id += 1
     return task 
@@ -79,6 +79,7 @@ async def update_task(task_id: int, task_data: TaskCreate):
         if task.id == task_id:
             task.title = task_data.title
             task.description = task_data.description
+            task.completed = task_data.completed
             return task
     raise HTTPException(status_code=404, detail="Task not found")
 

@@ -10,6 +10,8 @@ from cc_simple_server.database import get_db_connection
 init_db()
 
 app = FastAPI()
+next_id = 1
+task = []
 
 ############################################
 # Edit the code below this line
@@ -37,7 +39,6 @@ async def create_task(task_data: TaskCreate):
         TaskRead: The created task data
     """
 
-    global next_id
     task = TaskRead(id=next_id, title=task_data.title, description=task_data.description)
     tasks.append(task)
     next_id += 1

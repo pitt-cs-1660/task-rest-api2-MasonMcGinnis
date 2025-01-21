@@ -11,7 +11,7 @@ init_db()
 
 app = FastAPI()
 next_id = 1
-task = []
+tasks = []
 
 ############################################
 # Edit the code below this line

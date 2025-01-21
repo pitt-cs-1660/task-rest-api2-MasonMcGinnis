@@ -36,7 +36,12 @@ async def create_task(task_data: TaskCreate):
     Returns:
         TaskRead: The created task data
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+
+    global next_id
+    task = TaskRead(id=next_id, title=task_data.title, description=task_data.description)
+    tasks.append(task)
+    next_id += 1
+    return task 
 
 
 # GET ROUTE to get all tasks
@@ -51,7 +56,7 @@ async def get_tasks():
     Returns:
         list[TaskRead]: A list of all tasks in the database
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    return tasks
 
 
 # UPDATE ROUTE data is sent in the body of the request and the task_id is in the URL
@@ -67,7 +72,12 @@ async def update_task(task_id: int, task_data: TaskCreate):
     Returns:
         TaskRead: The updated task data
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    for task in tasks:
+        if task.id == task_id:
+            task.title = task_data.title
+            task.description = task_data.description
+            return task
+    raise HTTPException(status_code=404, detail="Task not found")
 
 
 # DELETE ROUTE task_id is in the URL
@@ -82,4 +92,6 @@ async def delete_task(task_id: int):
     Returns:
         dict: A message indicating that the task was deleted successfully
     """
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Not implemented")
+    global tasks
+    tasks = [task for task in tasks if task.id != task_id]
+    return {"message": "Task deletd successfully"}

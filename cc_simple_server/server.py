@@ -37,11 +37,20 @@ async def create_task(task_data: TaskCreate):
     Returns:
         TaskRead: The created task data
     """
-    global next_id, tasks
-    task = TaskRead(id=next_id, title=task_data.title, description=task_data.description, completed=task_data.completed)
-    tasks.append(task)
-    next_id += 1
-    return task 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO tasks (title, description, completed) VALUES (?, ?, ?)",
+            (task_data.title, task_data.description, task_data.completed),
+        )
+        conn.commit()
+        id = cursor.lastrowid
+    finally:
+        cursor.close()
+        conn.close()
+
+    return TaskRead(id=id, title=task_data.title, description=task_data.description, completed=task_data.completed)
 
 
 # GET ROUTE to get all tasks
@@ -56,8 +65,27 @@ async def get_tasks():
     Returns:
         list[TaskRead]: A list of all tasks in the database
     """
-    global tasks
-    return tasks
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM tasks")
+        conn.commit()
+        rows = cursor.fetchall()
+    finally:
+        cursor.close()
+        conn.close()
+    
+    read_tasks = []
+    for row in rows:
+        task = TaskRead(
+            id=row[0],
+            title=row[1],
+            description=row[2],
+            completed=row[3]
+            )
+        read_tasks.append(task)
+
+    return read_tasks
 
 
 # UPDATE ROUTE data is sent in the body of the request and the task_id is in the URL
@@ -73,14 +101,19 @@ async def update_task(task_id: int, task_data: TaskCreate):
     Returns:
         TaskRead: The updated task data
     """
-    global tasks
-    for task in tasks:
-        if task.id == task_id:
-            task.title = task_data.title
-            task.description = task_data.description
-            task.completed = task_data.completed
-            return task
-    raise HTTPException(status_code=404, detail="Task not found")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE tasks SET title = ?, description = ?, completed = ? WHERE id = ?",
+            (task_data.title, task_data.description, task_data.completed, task_id),
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+    
+    return TaskRead(id=task_id, title=task_data.title, description=task_data.description, completed=task_data.completed)
 
 
 # DELETE ROUTE task_id is in the URL
@@ -95,6 +128,13 @@ async def delete_task(task_id: int):
     Returns:
         dict: A message indicating that the task was deleted successfully
     """
-    global tasks
-    tasks = [task for task in tasks if task.id != task_id]
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
     return {"message": f"Task {task_id} deleted successfully"}
